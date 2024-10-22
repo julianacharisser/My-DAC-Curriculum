@@ -8,26 +8,25 @@
 --------------------------------------------------------------------------------------------------------------------------------------------------
 
 -- Run this once!
-CREATE TABLE myownschema.numbers (
-	index INT
-);
+-- CREATE TABLE myownschema.numbers (
+-- 	index INT
+-- );
 
-INSERT INTO myownschema.numbers (index)
-VALUES
-	(1),
-	(2),
-	(3),
-	(4),
-	(6),
-	(7),
-	(9),
-	(10),
-	(12),
-	(16);
--- Explore the table:
+-- INSERT INTO myownschema.numbers (index)
+-- VALUES
+-- 	(1),
+-- 	(2),
+-- 	(3),
+-- 	(4),
+-- 	(6),
+-- 	(7),
+-- 	(9),
+-- 	(10),
+-- 	(12),
+-- 	(16);
+-- -- Explore the table:
 
-SELECT *
-FROM myownschema.numbers;
+-- SELECT * FROM myownschema.numbers;
 
 -- Q1: Write a SQL query to find only the numbers that start a sequence of at least three consecutive numbers in the table. 
 -- Form the additional two columns to illustrate the sequence of at least three consecutive numbers. Do not include numbers that can't form three consecutive numbers.
@@ -46,18 +45,18 @@ col1 col2 col3
 
 -- Run these once!
 
-CREATE TABLE myownschema.stars (
-	star VARCHAR(1)
-);
+-- CREATE TABLE myownschema.stars (
+-- 	star VARCHAR(1)
+-- );
 
-INSERT INTO myownschema.stars (star)
-VALUES (
-	('*')
-);
+-- INSERT INTO myownschema.stars (star)
+-- VALUES (
+-- 	('*')
+-- );
 
--- Explore the table:
-SELECT *
-FROM myownschema.stars;
+-- -- Explore the table:
+-- SELECT *
+-- FROM myownschema.stars;
 
 -- Q2: Form a triangle that has three rows, 3 stars at the top row and 1 star at the bottom row and rectangle with 3 rows and 2 columns using this table only.
 
@@ -85,33 +84,33 @@ FROM myownschema.stars;
 -- The analyst is interested in the activation rate of specific users in the emails table, which may not include all users that could potentially be found in the texts table.
 -- For example, user 123 in the emails table may not be in the texts table and vice versa.
 
--- Create emails table
-CREATE TABLE myownschema.emails (
-    email_id INT,
-    user_id INT,
-    signup_date TIMESTAMP
-);
+-- -- Create emails table
+-- CREATE TABLE myownschema.emails (
+--     email_id INT,
+--     user_id INT,
+--     signup_date TIMESTAMP
+-- );
 
--- Create texts table
-CREATE TABLE myownschema.texts (
-    text_id INT,
-    email_id INT,
-    signup_action VARCHAR(20)
-);
+-- -- Create texts table
+-- CREATE TABLE myownschema.texts (
+--     text_id INT,
+--     email_id INT,
+--     signup_action VARCHAR(20)
+-- );
 
--- Insert sample data into emails table
-INSERT INTO myownschema.emails (email_id, user_id, signup_date)
-VALUES
-(125, 7771, '2022-06-14 00:00:00'),
-(236, 6950, '2022-07-01 00:00:00'),
-(433, 1052, '2022-07-09 00:00:00');
+-- -- Insert sample data into emails table
+-- INSERT INTO myownschema.emails (email_id, user_id, signup_date)
+-- VALUES
+-- (125, 7771, '2022-06-14 00:00:00'),
+-- (236, 6950, '2022-07-01 00:00:00'),
+-- (433, 1052, '2022-07-09 00:00:00');
 
--- Insert sample data into texts table
-INSERT INTO myownschema.texts (text_id, email_id, signup_action)
-VALUES
-(6878, 125, 'Confirmed'),
-(6920, 236, 'Not Confirmed'),
-(6994, 236, 'Confirmed');
+-- -- Insert sample data into texts table
+-- INSERT INTO myownschema.texts (text_id, email_id, signup_action)
+-- VALUES
+-- (6878, 125, 'Confirmed'),
+-- (6920, 236, 'Not Confirmed'),
+-- (6994, 236, 'Confirmed');
 
 -- Explore: 
 SELECT *
