@@ -7,8 +7,6 @@
 -- Given a table exam_scores containing the data about all of the exams that students took, form a new table to track the scores for each student.
 -- Note: Students took each exam only once.
 
-
-
 /* 
 Create the schema to store all your leetcode question
 
@@ -19,7 +17,14 @@ Create the table exam_scores
     score
 */
 
-INSERT INTO .... (student_id, student_name, exam_id, score)
+CREATE TABLE myownschema.exam_scores (
+    student_id INTEGER,
+    student_name VARCHAR(255),
+    exam_id INTEGER,
+    score INTEGER
+);
+
+INSERT INTO myownschema.exam_scores (student_id, student_name, exam_id, score)
 VALUES 
     (100, 'Anna', 1, 71),
     (100, 'Anna', 2, 72),
@@ -27,7 +32,16 @@ VALUES
     (100, 'Anna', 4, 74),
     (101, 'Brian', 1, 65);
 
-
+-- Answer
+SELECT 
+    student_name,
+    MAX(CASE WHEN exam_id = 1 THEN score END) AS exam_1,
+    MAX(CASE WHEN exam_id = 2 THEN score END) AS exam_2,
+    MAX(CASE WHEN exam_id = 3 THEN score END) AS exam_3,
+    MAX(CASE WHEN exam_id = 4 THEN score END) AS exam_4
+FROM myownschema.exam_scores
+GROUP BY 
+    student_name;
 
 --------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -45,6 +59,14 @@ Create the table user_experiences
     user_id
 */
 
+CREATE TABLE myownschema.user_experiences (
+    id INTEGER,
+    position_name VARCHAR(255),
+    start_date DATE,
+    end_date DATE,
+    user_id INTEGER
+);
+
 INSERT INTO myownschema.user_experiences (id, position_name, start_date, end_date, user_id)
 VALUES
     (1, 'Data Analyst', '2019-01-01 00:00:00', '2019-12-01 00:00:00', 1),
@@ -56,8 +78,28 @@ VALUES
     (7, 'ML Engineer', '2019-01-01 00:00:00', '2020-06-01 00:00:00', 5),
     (8, 'Data Scientist', '2019-01-01 00:00:00', '2019-11-01 00:00:00', 6);
 
-
-
+-- Answer
+WITH analyst_scientist_transitions AS (
+    -- Select users who had both "Data Analyst" and "Data Scientist" roles and the positions are consecutive
+    SELECT 
+        da.user_id
+    FROM myownschema.user_experiences da
+    INNER JOIN myownschema.user_experiences ds 
+    				ON da.user_id = ds.user_id
+        	 AND da.position_name = 'Data Analyst'
+        	 AND ds.position_name = 'Data Scientist'
+        	 AND da.end_date <= ds.start_date -- Ensure "Data Analyst" ends before "Data Scientist" begins
+    LEFT JOIN myownschema.user_experiences other
+    			 ON da.user_id = other.user_id
+        	AND other.start_date BETWEEN da.end_date AND ds.start_date
+        	AND other.position_name NOT IN ('Data Analyst', 'Data Scientist')
+    WHERE other.user_id IS NULL -- Ensure no other role exists between "Data Analyst" and "Data Scientist"
+)
+-- Calculate the percentage of users with this career transition
+SELECT 
+    CAST(COUNT(DISTINCT user_id) AS FLOAT) / 
+    CAST((SELECT COUNT(DISTINCT user_id) FROM myownschema.user_experiences) AS FLOAT) AS percentage
+FROM analyst_scientist_transitions;
 
 --------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -108,3 +150,25 @@ FROM myownschema.attribution;
 SELECT *
 FROM myownschema.user_sessions;
 
+-- Answer
+WITH first_contact AS (
+    SELECT 
+        us.user_id,
+        a.channel,
+        MIN(us.created_at) AS first_contact_time
+    FROM myownschema.attribution a
+    INNER JOIN myownschema.user_sessions us 
+    				ON us.session_id = a.session_id
+    GROUP BY 
+        us.user_id, a.channel
+)
+SELECT DISTINCT
+    fs.user_id,
+    fs.channel
+FROM first_contact fs
+INNER JOIN myownschema.user_sessions us 
+				ON us.user_id = fs.user_id
+INNER JOIN myownschema.attribution a 
+				ON us.session_id = a.session_id 
+    	 AND a.conversion = TRUE
+    	 AND us.created_at = fs.first_contact_time;

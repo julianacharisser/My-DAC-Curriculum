@@ -8,25 +8,26 @@
 --------------------------------------------------------------------------------------------------------------------------------------------------
 
 -- Run this once!
--- CREATE TABLE myownschema.numbers (
--- 	index INT
--- );
+CREATE TABLE myownschema.numbers (
+	index INT
+);
 
--- INSERT INTO myownschema.numbers (index)
--- VALUES
--- 	(1),
--- 	(2),
--- 	(3),
--- 	(4),
--- 	(6),
--- 	(7),
--- 	(9),
--- 	(10),
--- 	(12),
--- 	(16);
--- -- Explore the table:
-
--- SELECT * FROM myownschema.numbers;
+INSERT INTO myownschema.numbers (index)
+VALUES
+	(1),
+	(2),
+	(3),
+	(4),
+	(6),
+	(7),
+	(9),
+	(10),
+	(12),
+	(16);
+	
+-- Explore the table:
+SELECT *
+FROM myownschema.numbers;
 
 -- Q1: Write a SQL query to find only the numbers that start a sequence of at least three consecutive numbers in the table. 
 -- Form the additional two columns to illustrate the sequence of at least three consecutive numbers. Do not include numbers that can't form three consecutive numbers.
@@ -39,32 +40,76 @@ col1 col2 col3
 10   11   12
 */
 
--- Answer
-
+SELECT 
+	num1.index AS number1,
+	num2.index AS number2,
+	num3.index AS number3
+FROM myownschema.numbers AS num1
+INNER JOIN myownschema.numbers AS num2
+			  ON num1.index + 1 = num2.index
+INNER JOIN myownschema.numbers AS num3
+			  ON num1.index + 2 = num3.index;
 --------------------------------------------------------------------------------------------------------------------------------------------------
 
 -- Run these once!
 
--- CREATE TABLE myownschema.stars (
--- 	star VARCHAR(1)
--- );
+CREATE TABLE myownschema.stars (
+	star VARCHAR(1)
+);
 
--- INSERT INTO myownschema.stars (star)
--- VALUES (
--- 	('*')
--- );
+INSERT INTO myownschema.stars (star)
+VALUES (
+	('*')
+);
 
--- -- Explore the table:
--- SELECT *
--- FROM myownschema.stars;
+-- Explore the table:
+SELECT *
+FROM myownschema.stars;
 
 -- Q2: Form a triangle that has three rows, 3 stars at the top row and 1 star at the bottom row and rectangle with 3 rows and 2 columns using this table only.
 
 -- Rectangle Answer:
 
+SELECT *
+FROM myownschema.stars AS firststar
+	LEFT JOIN myownschema.stars AS secondstar
+	ON firststar.star = secondstar.star
+UNION ALL
+SELECT *
+FROM myownschema.stars AS firststar
+	LEFT JOIN myownschema.stars AS secondstar
+	ON firststar.star = secondstar.star
+UNION ALL
+SELECT *
+FROM myownschema.stars AS firststar
+	LEFT JOIN myownschema.stars AS secondstar
+	ON firststar.star = secondstar.star;
 
 -- Triangle Answer: 
 
+SELECT 
+	firststar.star,
+	secondstar.star,
+	thirdstar.star
+FROM myownschema.stars AS firststar
+	LEFT JOIN myownschema.stars AS secondstar
+	ON firststar.star = secondstar.star
+	LEFT JOIN myownschema.stars AS thirdstar
+	ON firststar.star = thirdstar.star
+UNION ALL
+SELECT 
+	firststar.star,
+	secondstar.star,
+	'' AS blank
+FROM myownschema.stars AS firststar
+	LEFT JOIN myownschema.stars AS secondstar
+	ON firststar.star = secondstar.star
+UNION ALL
+SELECT 
+	firststar.star,
+	'' AS blank1,
+	'' AS blank2
+FROM myownschema.stars AS firststar;
 
 --------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -84,33 +129,33 @@ col1 col2 col3
 -- The analyst is interested in the activation rate of specific users in the emails table, which may not include all users that could potentially be found in the texts table.
 -- For example, user 123 in the emails table may not be in the texts table and vice versa.
 
--- -- Create emails table
--- CREATE TABLE myownschema.emails (
---     email_id INT,
---     user_id INT,
---     signup_date TIMESTAMP
--- );
+-- Create emails table
+CREATE TABLE myownschema.emails (
+    email_id INT,
+    user_id INT,
+    signup_date TIMESTAMP
+);
 
--- -- Create texts table
--- CREATE TABLE myownschema.texts (
---     text_id INT,
---     email_id INT,
---     signup_action VARCHAR(20)
--- );
+-- Create texts table
+CREATE TABLE myownschema.texts (
+    text_id INT,
+    email_id INT,
+    signup_action VARCHAR(20)
+);
 
--- -- Insert sample data into emails table
--- INSERT INTO myownschema.emails (email_id, user_id, signup_date)
--- VALUES
--- (125, 7771, '2022-06-14 00:00:00'),
--- (236, 6950, '2022-07-01 00:00:00'),
--- (433, 1052, '2022-07-09 00:00:00');
+-- Insert sample data into emails table
+INSERT INTO myownschema.emails (email_id, user_id, signup_date)
+VALUES
+(125, 7771, '2022-06-14 00:00:00'),
+(236, 6950, '2022-07-01 00:00:00'),
+(433, 1052, '2022-07-09 00:00:00');
 
--- -- Insert sample data into texts table
--- INSERT INTO myownschema.texts (text_id, email_id, signup_action)
--- VALUES
--- (6878, 125, 'Confirmed'),
--- (6920, 236, 'Not Confirmed'),
--- (6994, 236, 'Confirmed');
+-- Insert sample data into texts table
+INSERT INTO myownschema.texts (text_id, email_id, signup_action)
+VALUES
+(6878, 125, 'Confirmed'),
+(6920, 236, 'Not Confirmed'),
+(6994, 236, 'Confirmed');
 
 -- Explore: 
 SELECT *
@@ -119,8 +164,15 @@ FROM myownschema.emails;
 SELECT *
 FROM myownschema.texts;
 
--- Answer:
-
+SELECT 
+  ROUND(
+		CAST(COUNT(texts.email_id) AS decimal) / COUNT(DISTINCT emails.email_id),
+		2
+	) AS activation_rate
+FROM myownschema.emails
+LEFT JOIN myownschema.texts
+       ON emails.email_id = texts.email_id
+      AND texts.signup_action= 'Confirmed';
 
 --------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -155,6 +207,20 @@ SELECT *
 FROM myownschema.zomato_orders;
 
 -- Answer:
+SELECT
+  wrong.order_id AS corrected_order_id,
+  CASE 
+    WHEN t2.order_id IS NULL AND t1.order_id IS NULL THEN wrong.item
+    WHEN t1.order_id IS NULL AND t2.order_id IS NOT NULL THEN t2.item
+    WHEN t2.order_id IS NULL AND t1.order_id IS NOT NULL THEN t1.item
+  END AS item
+FROM myownschema.zomato_orders AS wrong 
+LEFT JOIN myownschema.zomato_orders AS t1 
+	   ON wrong.order_id = (t1.order_id + 1)
+      AND t1.order_id % 2 = 1
+LEFT JOIN myownschema.zomato_orders AS t2
+	   ON wrong.order_id = (t2.order_id - 1)
+	  AND t2.order_id % 2 = 0;
 
 --------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -184,7 +250,16 @@ SELECT *
 FROM myownschema.user_transactions;
 
 -- Answer:
-
+SELECT 
+  EXTRACT(YEAR FROM transaction_date) AS year,
+  product_id,
+  spend AS curr_year_spend,
+  LAG(spend) OVER(PARTITION BY product_id ORDER BY EXTRACT(YEAR FROM transaction_date)ASC) AS prev_year_spend,
+  ROUND(
+  	100.0 * spend / LAG(spend) OVER(PARTITION BY product_id ORDER BY EXTRACT(YEAR FROM transaction_date) ASC) - 100,
+		2
+  ) AS yoy_rate
+from myownschema.user_transactions;
 
 --------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -257,7 +332,35 @@ SELECT *
 FROM myownschema.actor;
 
 -- Answers:
+WITH actor_ratings AS (
+    SELECT
+        renting.customer_id,
+        renting.customer_name,
+        renting.customer_age,
+        renting.customer_address,
+        actor.actor_name,
+        actor.movie_name,
+        renting.rating,
+        ROW_NUMBER() OVER (PARTITION BY renting.customer_id ORDER BY renting.rating DESC) AS ranking
+    FROM myownschema.renting AS renting
+    INNER JOIN myownschema.actsin AS actsin
+						ON renting.rental_id = actsin.rental_id
+    INNER JOIN myownschema.actor AS actor
+      		ON actsin.actor_id = actor.actor_id
+)
 
+SELECT
+    customer_id,
+    customer_name,
+    movie_name,
+    actor_name,
+    rating,
+    ranking
+FROM actor_ratings
+WHERE ranking <= 3
+ORDER BY 
+	customer_id, 
+	ranking;
 
 --------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -342,4 +445,23 @@ SELECT *
 FROM myownschema.orders;
 
 -- Answer:
-	
+WITH total_orders AS (
+	SELECT
+		store_id,
+		customer_id,
+		COUNT(*) AS orders,
+		DENSE_RANK() OVER(PARTITION BY customer_id ORDER BY COUNT(*) DESC) AS rank
+	FROM myownschema.orders
+	GROUP BY 
+		store_id,
+		customer_id
+)
+
+SELECT
+	customer.name,
+	total_orders.orders,
+	total_orders.rank
+FROM myownschema.customer AS customer
+LEFT JOIN total_orders
+       ON total_orders.customer_id = customer.customer_id
+WHERE total_orders.rank <=3;		

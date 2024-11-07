@@ -10,23 +10,37 @@
 -- Sort the result set in ascending order on jobtitle.
 -- humanresources.employee table
 
---Answer
+SELECT *  
+FROM humanresources.employee  
+ORDER BY jobtitle;
 
 -------------------------------------------------------------------------------------------------------------------------------------------
 
 -- Q2: From the following table person.person write a query in SQL to return all rows and a subset of the columns (firstName, lastName, businessentityid) from the person table in the AdventureWorks database. 
 -- The third column heading is renamed to employee_id. Arranged the output in ascending order by lastname.
 
---Answer
+SELECT 
+	firstname, 
+	lastname, 
+	businessentityid as employee_id  
+FROM person.person   
+ORDER BY lastname;
 
 -------------------------------------------------------------------------------------------------------------------------------------------
 
 -- Q3: From the following table write a query in SQL to return only the rows for product that have a sellstartdate that is not NULL and a productline of 'T'. 
--- Return productid, productnumber, and name. Change the name to productname. Arranged the output in ascending order on name.
+-- Return productid, productnumber, and name. Change the name to productname. Arrange the output in ascending order on name.
 
 -- production.product
 
---Answer
+SELECT 
+	productid, 
+	productnumber, 
+	name AS productname
+FROM production.product
+WHERE sellstartdate IS NOT NULL
+	AND production.product.productline= 'T'
+ORDER BY name;
 
 -------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -35,7 +49,12 @@
 
 -- sales.salesorderheader
 
---Answer
+SELECT 
+	customerid, 
+	SUM(freight) AS total_freight 
+FROM sales.salesorderheader
+GROUP BY customerid
+ORDER BY customerid ASC;
 
 -------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -44,7 +63,14 @@
 
 -- person.businessentityaddress
 
---Answer
+SELECT 
+	a.city, 
+	COUNT(b.addressid) num_of_employees 
+FROM person.businessentityaddress AS b
+INNER JOIN person.address AS a  
+        ON b.addressid = a.addressid
+GROUP BY a.city
+ORDER BY a.city;
 
 -------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -53,27 +79,61 @@
 
 -- person.businessentitycontact, person.contacttype, person.person
 
---Answer
+SELECT 
+	pp.businessentityid, 
+	lastname, 
+	firstname
+FROM person.businessentitycontact AS pb 
+	INNER JOIN person.contacttype AS pc
+	ON pb.ContactTypeID = pc.ContactTypeID
+	INNER JOIN person.person AS pp
+	ON pb.PersonID = pp.BusinessEntityID
+WHERE pc.Name = 'Purchasing Manager'
+ORDER BY
+	lastname, 
+	firstname;
 
 -------------------------------------------------------------------------------------------------------------------------------------------
 
 -- Q7: From the following table sales.salesorderdetail  write a query in  SQL to retrieve the total cost of each salesorderID that exceeds 100000. 
 -- Return SalesOrderID, total cost. Round to 2 decimal place and add the dollar sign at the front.
 
---Answer
+SELECT 
+    salesorderid, 
+    CONCAT('$', ROUND(SUM(orderqty * unitprice),2)) AS order_cost 
+FROM sales.salesorderdetail 
+GROUP BY salesorderid
+HAVING SUM(orderqty*unitprice) > 100000.00 
+ORDER BY 
+    salesorderid;
 
 -------------------------------------------------------------------------------------------------------------------------------------------
 
 -- Q8:From the following person.person table write a query in  SQL to retrieve those persons whose last name begins with letter 'R' and firstname end with 'n'. 
 -- Return lastname, and firstname and display the result in ascending order on firstname and descending order on lastname columns.
 
---Answer
+SELECT 
+	lastname, 
+	firstname 
+FROM person.person  
+WHERE lastname LIKE 'R%'
+	AND firstname LIKE '%n'
+ORDER BY 
+	firstname ASC, 
+	lastname DESC;
 
 -------------------------------------------------------------------------------------------------------------------------------------------
 
 -- Q9: From the following humanresources.department table write a query in  SQL to skip the first 5 rows and return the next 5 rows from the sorted result set.
 
---Answer
+SELECT 
+	departmentid, 
+	name, 
+	groupname
+FROM humanresources.department
+ORDER BY departmentid   
+OFFSET 5  
+LIMIT 5;
 
 -------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -82,6 +142,17 @@
 
 -- person.person, person.personphone
 
---Answer
+SELECT 
+	person.businessentityid,
+	person.firstname,
+	person.lastname,
+	personphone.phonenumber
+FROM person.person AS person
+INNER JOIN person.personphone AS personphone
+				ON person.businessentityid = personphone.businessentityid
+WHERE person.lastname LIKE 'L%'
+ORDER BY
+	person.firstname,
+	person.lastname;
 
 -------------------------------------------------------------------------------------------------------------------------------------------
